@@ -1,8 +1,16 @@
-import serial
-import time
+# import serial
+# import time
+import tkinter as tk
 
-ver = "1.0.0"
-print("###########################################################")
+ver = "1.0.0-alpha (GUI)"
+root = tk.Tk()
+root.title("PTT v"+ver)
+root.geometry("500x400")
+root.iconbitmap('ptt.png')
+
+
+
+'''print("###########################################################")
 print("# PTT Emulator v"+ver+" (c) 12/2020 by Erik Schauer, DO1FFE #")
 print("###########################################################")
 print("\n\n")
@@ -33,3 +41,5 @@ else:
 
 print("Programm beendet...")
 time.sleep(3)
+'''
+root.mainloop()
