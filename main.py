@@ -1,4 +1,4 @@
-# import serial
+import serial
 # import time
 from tkinter import *
 import tkinter.font as tkFont
@@ -19,6 +19,7 @@ label2 = Label(root, text="PTT v"+ver+"\n\xa9 12/2020 by Erik Schauer, DO1FFE", 
 label2.grid(column=1, row=0, padx=20)
 
 OptionList = [
+"----",
 "COM1",
 "COM2",
 "COM3",
@@ -32,17 +33,21 @@ auswahl1 = OptionMenu(root, variable, *OptionList)
 auswahl1.config(width=7, font=('Helvetica', 12))
 auswahl1.grid(column=0, row=1, pady=20)
 
+global ser
+
 def callback(*args):
     button1.configure(text="{} benutzen...".format(variable.get()))
-    comport = format(variable.get())
-
+    comport = "{}".format(variable.get())
+    ser = serial.Serial("{}".format(variable.get()))
+    print(comport)
 
 button1_text = "COM-Port auswählen"
 button1 = Button(root, text=button1_text)
 button1.grid(column=0, row=2, pady=5)
 
 variable.trace("w", callback)
-print(comport)
+
+
 '''
 print("###########################################################")
 print("# PTT Emulator v"+ver+" (c) 12/2020 by Erik Schauer, DO1FFE #")
@@ -77,3 +82,6 @@ print("Programm beendet...")
 time.sleep(3)
 '''
 root.mainloop()
+ser.setRTS(False)
+ser.setDTR(False)
+ser.close()
