@@ -12,7 +12,6 @@ img = PhotoImage('ptt.png')
 label1 = Label(root, image=img, text='Hello World!')
 label1.grid(column=0, row=0)
 
-
 '''
 print("###########################################################")
 print("# PTT Emulator v"+ver+" (c) 12/2020 by Erik Schauer, DO1FFE #")
