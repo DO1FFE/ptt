@@ -2,18 +2,19 @@
 # import time
 from tkinter import *
 
-ver = "1.0.0-alpha (GUI)"
+ver = "0.9-alpha (GUI)"
 root = Tk()
 root.title("PTT v"+ver)
 root.geometry("500x400")
 root.iconbitmap('ptt.png')
 img = PhotoImage('ptt.png')
 
-myLabel = Label(root, image=img)
-myLabel.grid(column=0, row=0)
+label1 = Label(root, image=img, text='Hello World!')
+label1.grid(column=0, row=0)
 
 
-'''print("###########################################################")
+'''
+print("###########################################################")
 print("# PTT Emulator v"+ver+" (c) 12/2020 by Erik Schauer, DO1FFE #")
 print("###########################################################")
 print("\n\n")
