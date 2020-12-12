@@ -1,13 +1,16 @@
 # import serial
 # import time
-import tkinter as tk
+from tkinter import *
 
 ver = "1.0.0-alpha (GUI)"
-root = tk.Tk()
+root = Tk()
 root.title("PTT v"+ver)
 root.geometry("500x400")
 root.iconbitmap('ptt.png')
+img = PhotoImage('ptt.png')
 
+myLabel = Label(root, image=img)
+myLabel.grid(column=0, row=0)
 
 
 '''print("###########################################################")
