@@ -7,10 +7,13 @@ root = Tk()
 root.title("PTT v"+ver)
 root.geometry("500x400")
 root.iconbitmap('ptt.png')
-img = PhotoImage('ptt.png')
+icon = PhotoImage(file='ptt.png')
 
-label1 = Label(root, image=img, text='Hello World!')
+label1 = Label(root, image=icon)
 label1.grid(column=0, row=0)
+auswahl1 = Listbox(root, bg="black", fg="white", width=5)
+auswahl1.grid(column=0, row=1)
+
 
 '''
 print("###########################################################")
