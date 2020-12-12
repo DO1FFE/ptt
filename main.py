@@ -6,13 +6,20 @@ ver = "0.9-alpha (GUI)"
 root = Tk()
 root.title("PTT v"+ver)
 root.geometry("500x400")
-root.iconbitmap('ptt.png')
+root.iconbitmap('ptt.ico')
 icon = PhotoImage(file='ptt.png')
 
 label1 = Label(root, image=icon)
 label1.grid(column=0, row=0)
-auswahl1 = Listbox(root, bg="black", fg="white", width=5)
-auswahl1.grid(column=0, row=1)
+auswahl1 = Listbox(root, bg="black", fg="white", width=6)
+auswahl1.grid(column=1, row=0)
+auswahl1.insert('1', 'COM1')
+auswahl1.insert('2', 'COM2')
+auswahl1.insert('3', 'COM3')
+comport = auswahl1.curselection()
+button1_text = "COM benutzen"
+button1 = Button(root, text=button1_text)
+button1.grid(column=1, row=1)
 
 
 '''
