@@ -1,26 +1,47 @@
 # import serial
 # import time
 from tkinter import *
+import tkinter.font as tkFont
+from PIL import Image, ImageTk
 
 ver = "0.9-alpha (GUI)"
 root = Tk()
 root.title("PTT v"+ver)
-root.geometry("500x400")
+root.geometry("600x400")
 root.iconbitmap('ptt.ico')
-icon = PhotoImage(file='ptt.png')
+icon = ImageTk.PhotoImage(Image.open('ptt.png').resize((100, 100)))
+fontStyle = tkFont.Font(family="Lucida Grande", size=20)
 
 label1 = Label(root, image=icon)
 label1.grid(column=0, row=0)
-auswahl1 = Listbox(root, bg="black", fg="white", width=6)
-auswahl1.grid(column=1, row=0)
-auswahl1.insert('1', 'COM1')
-auswahl1.insert('2', 'COM2')
-auswahl1.insert('3', 'COM3')
-comport = auswahl1.curselection()
-button1_text = "COM benutzen"
-button1 = Button(root, text=button1_text)
-button1.grid(column=1, row=1)
+label2 = Label(root, text="PTT v"+ver+"\n\xa9 12/2020 by Erik Schauer, DO1FFE", font=fontStyle)
+label2.grid(column=1, row=0, padx=20)
 
+OptionList = [
+"COM1",
+"COM2",
+"COM3",
+"COM4"
+]
+
+variable = StringVar(root)
+variable.set(OptionList[0])
+
+auswahl1 = OptionMenu(root, variable, *OptionList)
+auswahl1.config(width=7, font=('Helvetica', 12))
+auswahl1.grid(column=0, row=1, pady=20)
+
+comport = variable.get()
+def callback(*args):
+    button1.configure(text="{} benutzen...".format(variable.get()))
+    comport = variable.get()
+
+
+button1_text = f"{comport} benutzen..."
+button1 = Button(root, text=button1_text)
+button1.grid(column=0, row=2, pady=5)
+
+variable.trace("w", callback)
 
 '''
 print("###########################################################")
