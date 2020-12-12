@@ -11,6 +11,7 @@ root.geometry("600x400")
 root.iconbitmap('ptt.ico')
 icon = ImageTk.PhotoImage(Image.open('ptt.png').resize((100, 100)))
 fontStyle = tkFont.Font(family="Lucida Grande", size=20)
+global comport
 
 label1 = Label(root, image=icon)
 label1.grid(column=0, row=0)
@@ -31,18 +32,17 @@ auswahl1 = OptionMenu(root, variable, *OptionList)
 auswahl1.config(width=7, font=('Helvetica', 12))
 auswahl1.grid(column=0, row=1, pady=20)
 
-comport = variable.get()
 def callback(*args):
     button1.configure(text="{} benutzen...".format(variable.get()))
-    comport = variable.get()
+    comport = format(variable.get())
 
 
-button1_text = f"{comport} benutzen..."
+button1_text = "COM-Port auswählen"
 button1 = Button(root, text=button1_text)
 button1.grid(column=0, row=2, pady=5)
 
 variable.trace("w", callback)
-
+print(comport)
 '''
 print("###########################################################")
 print("# PTT Emulator v"+ver+" (c) 12/2020 by Erik Schauer, DO1FFE #")
