@@ -1,8 +1,12 @@
 import serial
 # import time
 from tkinter import *
+from tkinter import ttk
 import tkinter.font as tkFont
 from PIL import Image, ImageTk
+
+global ser
+global comport
 
 ver = "0.9-alpha (GUI)"
 root = Tk()
@@ -10,42 +14,52 @@ root.title("PTT v"+ver)
 root.geometry("600x400")
 root.iconbitmap('ptt.ico')
 icon = ImageTk.PhotoImage(Image.open('ptt.png').resize((100, 100)))
-fontStyle = tkFont.Font(family="Lucida Grande", size=20)
-global comport
+fontStyle = tkFont.Font(family="Lucida Grande", size=18)
 
 label1 = Label(root, image=icon)
-label1.grid(column=0, row=0)
+label1.grid(row=0, column=0)
 label2 = Label(root, text="PTT v"+ver+"\n\xa9 12/2020 by Erik Schauer, DO1FFE", font=fontStyle)
-label2.grid(column=1, row=0, padx=20)
+label2.grid(row=0, column=1, columnspan=3)
 
 OptionList = [
-"----",
-"COM1",
-"COM2",
-"COM3",
-"COM4"
+    "COM1",
+    "COM2",
+    "COM3",
+    "COM4"
 ]
 
-variable = StringVar(root)
-variable.set(OptionList[0])
+def com_select(e):
+    global ser
+    comport = com_combo.get()
+    ser = serial.Serial(comport)
+    com_label.config(text=f"{comport}, 9600,8,N,1")
+    tx_button.config(text=f"{comport} TX")
 
-auswahl1 = OptionMenu(root, variable, *OptionList)
-auswahl1.config(width=7, font=('Helvetica', 12))
-auswahl1.grid(column=0, row=1, pady=20)
+def senden():
+    ser.setRTS(True)
+    ser.setDTR(True)
+    print("TX")
 
-global ser
+def nicht_senden():
+    ser.setRTS(False)
+    ser.setDTR(False)
+    print("RX")
 
-def callback(*args):
-    button1.configure(text="{} benutzen...".format(variable.get()))
-    comport = "{}".format(variable.get())
-    ser = serial.Serial("{}".format(variable.get()))
-    print(comport)
 
-button1_text = "COM-Port auswählen"
-button1 = Button(root, text=button1_text)
-button1.grid(column=0, row=2, pady=5)
+com_combo = ttk.Combobox(root, value=OptionList)
+com_combo.config(width=7, font=('Helvetica', 12))
+com_combo.grid(row=1, column=0)
+com_combo.bind("<<ComboboxSelected>>", com_select)
 
-variable.trace("w", callback)
+com_label = Label(root, text="<-- COM wählen!")
+com_label.config(width=20, font=('Helvetica', 12))
+com_label.grid(row=1, column=1)
+
+tx_button = Button(root, text="NO TX", command=senden)
+tx_button.grid(row=1, column=3)
+
+rx_button = Button(root, text="TX AUS", command=nicht_senden)
+rx_button.grid(row=1, column=4)
 
 
 '''
@@ -82,6 +96,6 @@ print("Programm beendet...")
 time.sleep(3)
 '''
 root.mainloop()
-ser.setRTS(False)
-ser.setDTR(False)
-ser.close()
+# ser.setRTS(False)
+# ser.setDTR(False)
+# ser.close()
