@@ -11,7 +11,7 @@ global comport
 ver = "0.9-alpha (GUI)"
 root = Tk()
 root.title("PTT v"+ver)
-root.geometry("600x200")
+root.geometry("550x170")
 root.iconbitmap('ptt.ico')
 root.config(bg="grey")
 icon = ImageTk.PhotoImage(Image.open('ptt.png').resize((100, 100)))
