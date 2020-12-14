@@ -11,7 +11,7 @@ global comport
 ver = "0.9-alpha (GUI)"
 root = Tk()
 root.title("PTT v"+ver)
-root.geometry("550x170")
+root.geometry("525x175")
 root.iconbitmap('pics/ptt.ico')
 root.config(bg="grey")
 icon = ImageTk.PhotoImage(Image.open('pics/ptt.png').resize((100, 100)))
@@ -41,18 +41,21 @@ def com_select(e):
     com_combo.config(state=DISABLED)
     tx_button.config(text=f"{comport} TX", state=ACTIVE)
     close_com.config(state=ACTIVE)
+    status.config(text=f"{comport} geöffnet.")
 
 def senden():
     ser.setRTS(True)
     ser.setDTR(True)
     tx_button.config(state=DISABLED)
     rx_button.config(state=ACTIVE)
+    status.config(text=f"TX auf {comport}")
 
 def nicht_senden():
     ser.setRTS(False)
     ser.setDTR(False)
     rx_button.config(state=DISABLED)
     tx_button.config(state=ACTIVE)
+    status.config(text=f"Kein TX auf {comport}")
 
 def com_schliessen():
     rx_button.config(state=DISABLED)
@@ -60,9 +63,13 @@ def com_schliessen():
     close_com.config(state=DISABLED)
     com_combo.config(state=ACTIVE)
     com_label.config(text="<-- COM wählen!")
+    status.config(text=f"{comport} geschlossen.")
     ser.setRTS(False)
     ser.setDTR(False)
     ser.close()
+
+status = Label(root, text=f"Willkommen bei PTT v{ver}...", bg="grey", bd=2, relief=SUNKEN, anchor=E)
+status.grid(row=3, column=0, columnspan=5, sticky=W+E)
 
 com_combo = ttk.Combobox(root, value=OptionList)
 com_combo.config(width=7, font=('Helvetica', 12))
