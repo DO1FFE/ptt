@@ -1,9 +1,10 @@
 import serial
-# import time
+import serial.tools.list_ports
 from tkinter import *
 from tkinter import ttk
 import tkinter.font as tkFont
 from PIL import Image, ImageTk
+import sounddevice as sd
 
 global ser
 global comport
@@ -12,9 +13,9 @@ ver = "0.9-alpha (GUI)"
 root = Tk()
 root.title("PTT v"+ver)
 root.geometry("550x170")
-root.iconbitmap('ptt.ico')
+root.iconbitmap('pics/ptt.ico')
 root.config(bg="grey")
-icon = ImageTk.PhotoImage(Image.open('ptt.png').resize((100, 100)))
+icon = ImageTk.PhotoImage(Image.open('pics/ptt.png').resize((100, 100)))
 fontStyle = tkFont.Font(family="Lucida Grande", size=18)
 
 label1 = Label(root, image=icon, bg="grey")
@@ -22,12 +23,19 @@ label1.grid(row=0, column=0)
 label2 = Label(root, text="PTT v"+ver+"\n\xa9 12/2020 by Erik Schauer, DO1FFE", font=fontStyle, bg="grey")
 label2.grid(row=0, column=1, columnspan=4)
 
-OptionList = [
-    "COM1",
-    "COM2",
-    "COM3",
-    "COM4"
-]
+
+# COM-Ports aus dem System auslesen und in das Dropdown-Menü einbinden.
+OptionList = []
+ports = serial.tools.list_ports.comports(include_links=False)
+x = 0
+for port in ports:
+    OptionList.insert(x, port.device)
+    x =+1
+
+print(OptionList)
+
+scard = sd.query_devices()
+print(scard)
 
 def com_select(e):
     global ser
@@ -79,39 +87,7 @@ rx_button.grid(row=1, column=4)
 close_com = Button(root, text="COM-Port schliessen", state=DISABLED, command=com_schliessen)
 close_com.grid(row=2, column=0)
 
-'''
-print("###########################################################")
-print("# PTT Emulator v"+ver+" (c) 12/2020 by Erik Schauer, DO1FFE #")
-print("###########################################################")
-print("\n\n")
-com = input("Welchen COM-Port [1/2/3/..]? : ")
-comport = "COM"+com
-print("Öffne "+comport+"...")
-ser = serial.Serial(comport)
-print("OK")
-print("\n\nEingabe 1 = RTS AN | 0 = RTS AUS | \"x\" beendet das Programm!")
-onoff = "0"
-while onoff != "x":
-    time.sleep(1)
-    onoff = input("RTS [0/1/x]? : ")
-    if onoff == "0":
-        print("RTS auf COM"+com+" AUS.")
-        ser.setRTS(False)
-        ser.setDTR(False)
-    elif onoff == "1":
-        print("RTS auf COM"+com+" AN.")
-        ser.setRTS(True)
-        ser.setDTR(True)
-else:
-    print("RTS auf COM"+com+" AUS.")
-    ser.setRTS(False)
-    ser.setDTR(False)
-    print("Schliesse COM"+com+"...")
-    ser.close()
 
-print("Programm beendet...")
-time.sleep(3)
-'''
 root.mainloop()
 ser.setRTS(False)
 ser.setDTR(False)
