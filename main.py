@@ -12,6 +12,7 @@ ver = "0.9-alpha (GUI)"
 root = Tk()
 root.title("PTT v"+ver)
 root.geometry("525x175")
+root.resizable(width=False, height=False)
 root.iconbitmap('pics/ptt.ico')
 root.config(bg="grey")
 icon = ImageTk.PhotoImage(Image.open('pics/ptt.png').resize((100, 100)))
