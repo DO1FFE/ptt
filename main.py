@@ -4,7 +4,6 @@ from tkinter import *
 from tkinter import ttk
 import tkinter.font as tkFont
 from PIL import Image, ImageTk
-import sounddevice as sd
 
 global ser
 global comport
@@ -32,10 +31,6 @@ for port in ports:
     OptionList.insert(x, port.device)
     x =+1
 
-print(OptionList)
-
-scard = sd.query_devices()
-print(scard)
 
 def com_select(e):
     global ser
