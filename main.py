@@ -9,7 +9,7 @@ from pygame import mixer
 global ser
 global comport
 
-ver = "0.9-alpha (GUI)"
+ver = "0.9.1-alpha (GUI)"
 root = Tk()
 root.title("PTT v"+ver)
 #root.geometry("525x175")
@@ -84,53 +84,53 @@ def play_song():
         mixer.music.load(current_song)
         mixer.music.set_volume(current_volume)
         mixer.music.play()
-        song_title_label.config(fg="green", text="Wird abgespielt: "+ str(song_title))
-        volume_label.config(fg="green", text="Volume: "+ str(current_volume))
+        song_title_label.config(fg="green", bg="grey", text="Wird abgespielt: "+ str(song_title))
+        volume_label.config(fg="green", bg="grey", text="Volume: "+ str(current_volume))
     except Exception as e:
         print(e)
-        song_title_label.config(fg="red", text="Fehler beim abspielen.")
+        song_title_label.config(fg="red", bg="grey", text="Fehler beim abspielen.")
 
 def reduce_volume():
     try:
         global current_volume
         if current_volume <=0:
-            volume_label.config(fg="red", text="Volume : Muted")
+            volume_label.config(fg="red", bg="grey", text="Volume : Muted")
             return
         current_volume = current_volume - float(0.1)
         current_volume = round(current_volume,1)
         mixer.music.set_volume(current_volume)
-        volume_label.config(fg="green", text="Volume: "+ str(current_volume))
+        volume_label.config(fg="green", bg="grey", text="Volume: "+ str(current_volume))
     except Exception as e:
         print(e)
-        song_title_label.config(fg="red", text="Keine MP3-Datei ausgewählt.")
+        song_title_label.config(fg="red", bg="grey", text="Keine MP3-Datei ausgewählt.")
 
 def increase_volume():
     try:
         global current_volume
         if current_volume >=1:
-            volume_label.config(fg="green", text="Volume : Max")
+            volume_label.config(fg="green", bg="grey", text="Volume : Max")
             return
         current_volume = current_volume + float(0.1)
         current_volume = round(current_volume,1)
         mixer.music.set_volume(current_volume)
-        volume_label.config(fg="green", text="Volume: "+ str(current_volume))
+        volume_label.config(fg="green", bg="grey", text="Volume: "+ str(current_volume))
     except Exception as e:
         print(e)
-        song_title_label.config(fg="red", text="Keine MP3-Datei ausgewählt.")
+        song_title_label.config(fg="red", bg="grey", text="Keine MP3-Datei ausgewählt.")
 
 def pause():
     try:
         mixer.music.pause()
     except Exception as e:
         print(e)
-        song_title_label.config(fg="red", text="Keine MP3-Datei ausgewählt.")
+        song_title_label.config(fg="red", bg="grey", text="Keine MP3-Datei ausgewählt.")
 
 def resume():
     try:
         mixer.music.unpause()
     except Exception as e:
         print(e)
-        song_title_label.config(fg="red", text="Keine MP3-Datei ausgewählt.")
+        song_title_label.config(fg="red", bg="grey", text="Keine MP3-Datei ausgewählt.")
 
 
 com_combo = ttk.Combobox(root, value=OptionList)
@@ -152,9 +152,9 @@ close_com = Button(root, text="COM-Port schliessen", state=DISABLED, command=com
 close_com.grid(row=2, column=0)
 
 
-song_title_label = Label(root, font=("Calibri", 12))
+song_title_label = Label(root, font=("Calibri", 12), bg="grey")
 song_title_label.grid(sticky="N", row=4, column=1, columnspan=3)
-volume_label = Label(root, font=("Calibri", 12))
+volume_label = Label(root, font=("Calibri", 12), bg="grey")
 volume_label.grid(sticky="N", row=6, column=1, columnspan=3)
 
 Button(root, text="MP3-Datei auswählen", font=("Calibri", 12), command=play_song).grid(row=3, columnspan=5,sticky="N")
