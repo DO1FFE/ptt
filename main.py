@@ -2,16 +2,18 @@ import serial
 import serial.tools.list_ports
 from tkinter import *
 from tkinter import ttk
+from tkinter import filedialog
 import tkinter.font as tkFont
 from PIL import Image, ImageTk
-
+from pygame import mixer
 global ser
 global comport
 
 ver = "0.9-alpha (GUI)"
 root = Tk()
 root.title("PTT v"+ver)
-root.geometry("525x175")
+#root.geometry("525x175")
+root.geometry("525x400")
 root.resizable(width=False, height=False)
 root.iconbitmap('pics/ptt.ico')
 root.config(bg="grey")
@@ -23,6 +25,7 @@ label1.grid(row=0, column=0)
 label2 = Label(root, text="PTT v"+ver+"\n\xa9 12/2020 by Erik Schauer, DO1FFE", font=fontStyle, bg="grey")
 label2.grid(row=0, column=1, columnspan=4)
 
+current_volume = float(0.5)
 
 # COM-Ports aus dem System auslesen und in das Dropdown-Menü einbinden.
 OptionList = []
@@ -31,7 +34,6 @@ x = 0
 for port in ports:
     OptionList.insert(x, port.device)
     x =+1
-
 
 def com_select(e):
     global ser
@@ -70,7 +72,66 @@ def com_schliessen():
     ser.close()
 
 status = Label(root, text=f"Willkommen bei PTT v{ver}...", bg="grey", bd=2, relief=SUNKEN, anchor=E)
-status.grid(row=3, column=0, columnspan=5, sticky=W+E)
+status.grid(row=10, column=0, columnspan=5, sticky=W+E)
+
+def play_song():
+    filename = filedialog.askopenfilename(initialdir="C:/",title="Bitte MP3-Datei auswählen")
+    current_song = filename
+    song_title = filename.split("/")
+    song_title = song_title[-1]
+    try:
+        mixer.init()
+        mixer.music.load(current_song)
+        mixer.music.set_volume(current_volume)
+        mixer.music.play()
+        song_title_label.config(fg="green", text="Wird abgespielt: "+ str(song_title))
+        volume_label.config(fg="green", text="Volume: "+ str(current_volume))
+    except Exception as e:
+        print(e)
+        song_title_label.config(fg="red", text="Fehler beim abspielen.")
+
+def reduce_volume():
+    try:
+        global current_volume
+        if current_volume <=0:
+            volume_label.config(fg="red", text="Volume : Muted")
+            return
+        current_volume = current_volume - float(0.1)
+        current_volume = round(current_volume,1)
+        mixer.music.set_volume(current_volume)
+        volume_label.config(fg="green", text="Volume: "+ str(current_volume))
+    except Exception as e:
+        print(e)
+        song_title_label.config(fg="red", text="Keine MP3-Datei ausgewählt.")
+
+def increase_volume():
+    try:
+        global current_volume
+        if current_volume >=1:
+            volume_label.config(fg="green", text="Volume : Max")
+            return
+        current_volume = current_volume + float(0.1)
+        current_volume = round(current_volume,1)
+        mixer.music.set_volume(current_volume)
+        volume_label.config(fg="green", text="Volume: "+ str(current_volume))
+    except Exception as e:
+        print(e)
+        song_title_label.config(fg="red", text="Keine MP3-Datei ausgewählt.")
+
+def pause():
+    try:
+        mixer.music.pause()
+    except Exception as e:
+        print(e)
+        song_title_label.config(fg="red", text="Keine MP3-Datei ausgewählt.")
+
+def resume():
+    try:
+        mixer.music.unpause()
+    except Exception as e:
+        print(e)
+        song_title_label.config(fg="red", text="Keine MP3-Datei ausgewählt.")
+
 
 com_combo = ttk.Combobox(root, value=OptionList)
 com_combo.config(width=7, font=('Helvetica', 12))
@@ -90,6 +151,17 @@ rx_button.grid(row=1, column=4)
 close_com = Button(root, text="COM-Port schliessen", state=DISABLED, command=com_schliessen)
 close_com.grid(row=2, column=0)
 
+
+song_title_label = Label(root, font=("Calibri", 12))
+song_title_label.grid(sticky="N", row=4, column=1, columnspan=3)
+volume_label = Label(root, font=("Calibri", 12))
+volume_label.grid(sticky="N", row=6, column=1, columnspan=3)
+
+Button(root, text="MP3-Datei auswählen", font=("Calibri", 12), command=play_song).grid(row=3, columnspan=5,sticky="N")
+Button(root, text="Pause", font=("Calibri", 12), command=pause).grid(row=4, columnspan=5,sticky="E")
+Button(root, text="Resume", font=("Calibri", 12), command=resume).grid(row=4, columnspan=5,sticky="W")
+Button(root, text="+", font=("Calibri", 12),width=5, command=increase_volume).grid(row=6, columnspan=5,sticky="E")
+Button(root, text="-", font=("Calibri", 12),width=5, command=reduce_volume).grid(row=6, columnspan=5,sticky="W")
 
 root.mainloop()
 ser.setRTS(False)
