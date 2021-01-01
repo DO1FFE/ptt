@@ -1,5 +1,5 @@
 ('C:\\Users\\werner\\PycharmProjects\\ptt\\dist\\PTT.exe',
- True,
+ False,
  False,
  False,
  'pics\\ptt.ico',
@@ -3172,7 +3172,7 @@
  [],
  False,
  False,
- 1609420947,
- [('run.exe',
-   'C:\\Users\\werner\\AppData\\Roaming\\Python\\Python38\\site-packages\\PyInstaller\\bootloader\\Windows-64bit\\run.exe',
+ 1609421131,
+ [('runw.exe',
+   'C:\\Users\\werner\\AppData\\Roaming\\Python\\Python38\\site-packages\\PyInstaller\\bootloader\\Windows-64bit\\runw.exe',
    'EXECUTABLE')])
