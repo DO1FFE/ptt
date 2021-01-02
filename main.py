@@ -10,14 +10,15 @@ import pygame._sdl2 as sdl2
 from pygame import mixer
 global ser
 global comport
+from time import sleep
 
 
-ver = "0.9.2-alpha (GUI)"
+ver = "0.9.3-alpha (GUI)"
 root = Tk()
 root.title("PTT v"+ver)
 #root.geometry("525x175")
-root.geometry("525x435")
-#root.resizable(width=False, height=False)
+#root.geometry("525x435")
+root.resizable(width=False, height=False)
 root.iconbitmap('pics/ptt.ico')
 root.config(bg="grey")
 icon = ImageTk.PhotoImage(Image.open('pics/ptt.png').resize((100, 100)))
@@ -41,25 +42,21 @@ for port in ports:
 # Wiedergabe-Devices auslesen und in das Dropdown-Menü einbinden.
 WiedergabeDevice = []
 pygame.init()
-x = 0
 is_capture = 0  # zero to request playback devices, non-zero to request recording devices
 num = sdl2.get_num_audio_devices(is_capture)
 names = [str(sdl2.get_audio_device_name(i, is_capture), encoding="utf-8") for i in range(num)]
 #print("\n".join(names))
-WiedergabeDevice.insert(x, "".join(names))
-x =+1
+WiedergabeDevice = names
 pygame.quit()
 
 # Aufnahme-Devices auslesen und in das Dropdown-Menü einbinden.
 AufnahmeDevice = []
 pygame.init()
-x = 0
 is_capture = 1  # zero to request playback devices, non-zero to request recording devices
 num = sdl2.get_num_audio_devices(is_capture)
 names = [str(sdl2.get_audio_device_name(i, is_capture), encoding="utf-8") for i in range(num)]
 #print("\n".join(names))
-AufnahmeDevice.insert(x, "".join(names))
-x =+1
+AufnahmeDevice = names
 pygame.quit()
 
 #print(WiedergabeDevice)
@@ -90,6 +87,8 @@ def senden():
     tx_button.config(state=DISABLED)
     rx_button.config(state=ACTIVE)
     status.config(text=f"TX auf {comport}")
+    sleep(1)
+    play()
 
 def nicht_senden():
     ser.setRTS(False)
@@ -97,6 +96,7 @@ def nicht_senden():
     rx_button.config(state=DISABLED)
     tx_button.config(state=ACTIVE)
     status.config(text=f"Kein TX auf {comport}")
+    stop()
 
 def com_schliessen():
     rx_button.config(state=DISABLED)
@@ -108,32 +108,36 @@ def com_schliessen():
     ser.setRTS(False)
     ser.setDTR(False)
     ser.close()
+    stop()
 
 status = Label(root, text=f"Willkommen bei PTT v{ver}...", bg="grey", bd=2, relief=SUNKEN, anchor=E)
 status.grid(row=10, column=0, columnspan=5, sticky=W+E)
 
-def play_song():
+def open_song():
+    global current_song
+    global song_title
     filename = filedialog.askopenfilename(initialdir="C:/",title="Bitte MP3-Datei auswählen")
     current_song = filename
     song_title = filename.split("/")
     song_title = song_title[-1]
-    try:
-        mixer.pre_init(devicename=play_device)
-        mixer.init()
-        mixer.music.load(current_song)
-        #mixer.music.set_volume(current_volume)
-        mixer.music.play()
-        song_title_label.config(fg="green", bg="grey", text="Wird abgespielt: "+ str(song_title))
-#        volume_label.config(fg="green", bg="grey", text="Volume: "+ str(current_volume))
-    except Exception as e:
-        print(e)
-        song_title_label.config(fg="red", bg="grey", text="Fehler beim abspielen.")
 
 def volume(x):
     mixer.music.set_volume(volume_slider.get())
     cur_vol = float(volume_slider.get()) * 100
     cur_vol = int(cur_vol)
-    volume_text.config(text=cur_vol, bg="gray")
+    volume_text.config(text=cur_vol, bg="grey")
+
+def play():
+    try:
+        mixer.pre_init(devicename=play_device)
+        mixer.init()
+        mixer.music.load(current_song)
+        # mixer.music.set_volume(current_volume)
+        mixer.music.play()
+        song_title_label.config(fg="green", bg="grey", text="Wird abgespielt: " + str(song_title))
+    except Exception as e:
+        print(e)
+        song_title_label.config(fg="red", bg="grey", text="Fehler beim abspielen.")
 
 def pause():
     try:
@@ -175,34 +179,38 @@ rx_button.grid(row=1, column=4)
 close_com = Button(root, text="COM-Port schliessen", state=DISABLED, command=com_schliessen)
 close_com.grid(row=2, column=0)
 
+song_title_box = LabelFrame(root, bg="grey")
+song_title_box.grid(sticky="N", row=4, column=0, columnspan=5)
+song_title_label = Label(song_title_box, font=("Calibri", 12), bg="grey")
+song_title_label.pack()
 
-song_title_label = Label(root, font=("Calibri", 12), bg="grey")
-song_title_label.grid(sticky="N", row=7, column=1, columnspan=3)
-#volume_label = Label(root, font=("Calibri", 12), bg="grey")
-#volume_label.grid(sticky="N", row=6, column=1, columnspan=3)
+Button(root, text="Audio-Datei auswählen", font=("Calibri", 12), command=open_song).grid(row=3, columnspan=5, sticky="N")
+button_frame = LabelFrame(root, text="Steuerung", bg="gray")
+button_frame.grid(row=5, rowspan=4, column=0, pady=20)
+Button(button_frame, text="Play", font=("Calibri", 12), fg="gray", command=play).pack(pady=5)
+Button(button_frame, text="Pause", font=("Calibri", 12), command=pause).pack(pady=5)
+Button(button_frame, text="Resume", font=("Calibri", 12), command=resume).pack(pady=5)
+Button(button_frame, text="Stop", font=("Calibri", 12), command=stop).pack(pady=5)
 
-Button(root, text="MP3-Datei auswählen", font=("Calibri", 12), command=play_song).grid(row=3, columnspan=5, sticky="N")
-Button(root, text="Pause", font=("Calibri", 12), command=pause).grid(row=4, column=0)
-Button(root, text="Resume", font=("Calibri", 12), command=resume).grid(row=5, column=0)
-Button(root, text="Stop", font=("Calibri", 12), command=stop).grid(row=6, column=0)
-#Button(root, text="+", font=("Calibri", 12), width=5, command=increase_volume).grid(row=6, column=0)
-#Button(root, text="-", font=("Calibri", 12), width=5, command=reduce_volume).grid(row=6, column=1)
 volume_frame = LabelFrame(root, text="Volume", bg="gray")
-volume_frame.grid(row=4, rowspan=3, column=1, pady=20)
+volume_frame.grid(row=5, rowspan=4, column=1, pady=20)
 volume_slider = ttk.Scale(volume_frame, from_=1, to=0, orient=VERTICAL, value=1, command=volume)
 volume_slider.pack(pady=10)
 volume_text = Label(volume_frame, text="100", bg="gray")
 volume_text.pack()
 
 sound_frame = LabelFrame(root, text="Sounddevices", bg="gray")
-sound_frame.grid(row=4, column=2, columnspan=3)
-
-wiedergabe_combo = ttk.Combobox(sound_frame, value=WiedergabeDevice)
+sound_frame.grid(row=5, rowspan=4, column=2, columnspan=3)
+wiedergabe_box = LabelFrame(sound_frame, text="Output", bg="gray")
+wiedergabe_box.pack(pady=10, padx=10)
+wiedergabe_combo = ttk.Combobox(wiedergabe_box, value=WiedergabeDevice)
 wiedergabe_combo.config(width=20, font=('Helvetica', 10))
 wiedergabe_combo.pack(pady=10, padx=10)
 wiedergabe_combo.bind("<<ComboboxSelected>>", wiedergabe_select)
 
-aufnahme_combo = ttk.Combobox(sound_frame, value=AufnahmeDevice)
+aufnahme_box = LabelFrame(sound_frame, text="Input", bg="gray")
+aufnahme_box.pack(pady=10, padx=10)
+aufnahme_combo = ttk.Combobox(aufnahme_box, value=AufnahmeDevice, state=DISABLED)
 aufnahme_combo.config(width=20, font=('Helvetica', 10))
 aufnahme_combo.pack(pady=10, padx=10)
 aufnahme_combo.bind("<<ComboboxSelected>>", aufnahme_select)
@@ -213,3 +221,4 @@ root.mainloop()
 ser.setRTS(False)
 ser.setDTR(False)
 ser.close()
+stop()
