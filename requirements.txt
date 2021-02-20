@@ -2,3 +2,4 @@ pyserial
 tkinter
 pillow
 sounddevice
+pygame

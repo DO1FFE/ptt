@@ -8,14 +8,17 @@ from PIL import Image, ImageTk
 import pygame
 import pygame._sdl2 as sdl2
 from pygame import mixer
+import threading
+import time
+from time import sleep
 global ser
 global comport
-from time import sleep
+global start
+global tot_timer
 
-
-ver = "0.9.3-alpha (GUI)"
+__version__ = "0.9.5-alpha (GUI)"
 root = Tk()
-root.title("PTT v"+ver)
+root.title("PTT v"+__version__)
 #root.geometry("525x175")
 #root.geometry("525x435")
 root.resizable(width=False, height=False)
@@ -26,10 +29,11 @@ fontStyle = tkFont.Font(family="Lucida Grande", size=18)
 
 label1 = Label(root, image=icon, bg="grey")
 label1.grid(row=0, column=0)
-label2 = Label(root, text="PTT v"+ver+"\n\xa9 01/2021 by Erik Schauer, DO1FFE", font=fontStyle, bg="grey")
+label2 = Label(root, text="PTT v"+__version__+"\n\xa9 02/2021 by Erik Schauer, DO1FFE", font=fontStyle, bg="grey")
 label2.grid(row=0, column=1, columnspan=4)
 
 current_volume = float(0.5)
+tot_timer = 0
 
 # COM-Ports aus dem System auslesen und in das Dropdown-Menü einbinden.
 OptionList = []
@@ -62,6 +66,28 @@ pygame.quit()
 #print(WiedergabeDevice)
 #print(AufnahmeDevice)
 
+tot_times = [1,2,3,4,5,6,7,8,9,10]
+
+class TOT_Timeout(threading.Thread):
+    def __init__(self, id, timer):
+        threading.Thread.__init__(self)
+        self.id = id
+        self.timer = timer*60
+
+    def run(self):
+        sleep(self.timer)
+        mixer.music.pause()
+        ser.setRTS(False)
+        ser.setDTR(False)
+        sleep(1)
+        ser.setRTS(True)
+        ser.setDTR(True)
+        mixer.music.unpause()
+
+def tot_auswahl(e):
+    global tot_timer
+    tot_timer = tot_combo.get()
+
 def wiedergabe_select(e):
     global play_device
     play_device = wiedergabe_combo.get()
@@ -82,6 +108,7 @@ def com_select(e):
     status.config(text=f"{comport} geöffnet.")
 
 def senden():
+    global start
     ser.setRTS(True)
     ser.setDTR(True)
     tx_button.config(state=DISABLED)
@@ -89,6 +116,10 @@ def senden():
     status.config(text=f"TX auf {comport}")
     sleep(1)
     play()
+    while True:
+        if tot_timer != 0:
+            tot1 = TOT_Timeout(1,tot_timer)
+            tot1.start()
 
 def nicht_senden():
     ser.setRTS(False)
@@ -110,7 +141,7 @@ def com_schliessen():
     ser.close()
     stop()
 
-status = Label(root, text=f"Willkommen bei PTT v{ver}...", bg="grey", bd=2, relief=SUNKEN, anchor=E)
+status = Label(root, text=f"Willkommen bei PTT v{__version__}...", bg="grey", bd=2, relief=SUNKEN, anchor=E)
 status.grid(row=10, column=0, columnspan=5, sticky=W+E)
 
 def open_song():
@@ -178,6 +209,12 @@ rx_button.grid(row=1, column=4)
 
 close_com = Button(root, text="COM-Port schliessen", state=DISABLED, command=com_schliessen)
 close_com.grid(row=2, column=0)
+
+tot_combo = ttk.Combobox(root, value=tot_times)
+tot_combo.config(width=4, font=('Helvetica', 12))
+tot_combo.grid(row=2, column=3)
+tot_combo.bind("<<ComboboxSelected>>", tot_auswahl)
+
 
 song_title_box = LabelFrame(root, bg="grey")
 song_title_box.grid(sticky="N", row=4, column=0, columnspan=5)
