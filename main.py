@@ -17,7 +17,7 @@ global comport
 global start
 global tot_timer
 
-__version__ = "0.9.6-alpha (GUI)"
+__version__ = "0.9.8-alpha (GUI)"
 root = Tk()
 root.title("PTT v" + __version__)
 # root.geometry("525x175")
@@ -30,7 +30,7 @@ fontStyle = tkFont.Font(family="Lucida Grande", size=18)
 
 label1 = Label(root, image=icon, bg="grey")
 label1.grid(row=0, column=0)
-label2 = Label(root, text="PTT v" + __version__ + "\n\xa9 02/2021 by Erik Schauer, DO1FFE", font=fontStyle, bg="grey")
+label2 = Label(root, text="PTT v" + __version__ + "\n\xa9 03/2021 by Erik Schauer, DO1FFE", font=fontStyle, bg="grey")
 label2.grid(row=0, column=1, columnspan=4)
 
 current_volume = float(0.5)
@@ -67,7 +67,7 @@ pygame.quit()
 # print(WiedergabeDevice)
 # print(AufnahmeDevice)
 
-tot_times = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+tot_times = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
 
 class TOT_Timeout(threading.Thread):
@@ -85,6 +85,17 @@ class TOT_Timeout(threading.Thread):
         ser.setRTS(True)
         ser.setDTR(True)
         mixer.music.unpause()
+
+def tot(tot_timer):
+    timer = int(tot_timer) * 60
+    sleep(timer)
+    mixer.music.pause()
+    ser.setRTS(False)
+    ser.setDTR(False)
+    sleep(1)
+    ser.setRTS(True)
+    ser.setDTR(True)
+    mixer.music.unpause()
 
 
 def tot_auswahl(e):
@@ -115,18 +126,17 @@ def com_select(e):
 
 
 def senden():
-    global start
     ser.setRTS(True)
     ser.setDTR(True)
     tx_button.config(state=DISABLED)
     rx_button.config(state=ACTIVE)
     status.config(text=f"TX auf {comport}")
     sleep(1)
-    play()
-    while True:
-        if tot_timer != 0:
-            tot1 = TOT_Timeout(1, tot_timer)
-            tot1.start()
+    while tot_timer != 0:
+        tot1 = threading.Thread(target=tot(tot_timer))
+        tot1.start()
+        #tot1 = TOT_Timeout(1, tot_timer)
+        #tot1.start()
 
 
 def nicht_senden():
