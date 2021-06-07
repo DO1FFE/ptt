@@ -1,0 +1,1 @@
+pyinstaller --noconfirm --onefile --windowed --icon "C:/Users/werner/PycharmProjects/ptt/pics/ptt.ico" --name "PTT" --add-data "C:/Users/werner/PycharmProjects/ptt/pics/ptt.png;/pics"  "C:/Users/werner/PycharmProjects/ptt/main.py"
