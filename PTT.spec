@@ -1,12 +1,13 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+
 block_cipher = None
 
 
-a = Analysis(['main.py'],
+a = Analysis(['C:/Users/werner/PycharmProjects/ptt/main.py'],
              pathex=['C:\\Users\\werner\\PycharmProjects\\ptt'],
              binaries=[],
-             datas=[],
+             datas=[('C:/Users/werner/PycharmProjects/ptt/pics/ptt.png', '/pics')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -30,4 +31,4 @@ exe = EXE(pyz,
           upx=True,
           upx_exclude=[],
           runtime_tmpdir=None,
-          console=False , icon='pics\\ptt.ico')
+          console=False , icon='C:\\Users\\werner\\PycharmProjects\\ptt\\pics\\ptt.ico')
