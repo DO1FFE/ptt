@@ -17,7 +17,9 @@ global comport
 global start
 global tot_timer
 
-__version__ = "0.9.8-alpha (GUI)"
+on_air = False
+
+__version__ = "0.9.9-alpha (GUI)"
 root = Tk()
 root.title("PTT v" + __version__)
 # root.geometry("525x175")
@@ -71,32 +73,20 @@ pygame.quit()
 tot_times = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
 
-class TOT_Timeout(threading.Thread):
-    def __init__(self, id, timer):
-        threading.Thread.__init__(self)
-        self.id = id
-        self.timer = int(timer) * 60
-
-    def run(self):
-        sleep(self.timer)
+def tot(tot_timer):
+    while on_air and tot_timer != 0:
+        print(f"Schlafe {tot_timer} Minute(n)...")
+        timer = int(tot_timer) * 60
+        sleep(timer)
         mixer.music.pause()
         ser.setRTS(False)
         ser.setDTR(False)
+        print("PAUSE")
         sleep(1)
+        print("UNPAUSE")
         ser.setRTS(True)
         ser.setDTR(True)
         mixer.music.unpause()
-
-def tot(tot_timer):
-    timer = int(tot_timer) * 60
-    sleep(timer)
-    mixer.music.pause()
-    ser.setRTS(False)
-    ser.setDTR(False)
-    sleep(1)
-    ser.setRTS(True)
-    ser.setDTR(True)
-    mixer.music.unpause()
 
 
 def tot_auswahl(e):
@@ -125,22 +115,26 @@ def com_select(e):
     close_com.config(state=ACTIVE)
     status.config(text=f"{comport} geöffnet.")
 
+def tx():
+    t1 = threading.Thread(target=senden)
+    t1.start()
 
 def senden():
+    global on_air
+    on_air = True
     ser.setRTS(True)
     ser.setDTR(True)
     tx_button.config(state=DISABLED)
     rx_button.config(state=ACTIVE)
     status.config(text=f"TX auf {comport}")
-    sleep(1)
     while tot_timer != 0:
         tot1 = threading.Thread(target=tot(tot_timer))
         tot1.start()
-        #tot1 = TOT_Timeout(1, tot_timer)
-        #tot1.start()
 
 
 def nicht_senden():
+    global on_air
+    on_air = False
     ser.setRTS(False)
     ser.setDTR(False)
     rx_button.config(state=DISABLED)
@@ -150,6 +144,8 @@ def nicht_senden():
 
 
 def com_schliessen():
+    global on_air
+    on_air = False
     rx_button.config(state=DISABLED)
     tx_button.config(state=DISABLED)
     close_com.config(state=DISABLED)
@@ -228,7 +224,7 @@ com_label = Label(root, text="<-- COM wählen!")
 com_label.config(width=20, font=('Helvetica', 12))
 com_label.grid(row=1, column=1)
 
-tx_button = Button(root, text="NO TX", state=DISABLED, command=senden)
+tx_button = Button(root, text="NO TX", state=DISABLED, command=tx)
 tx_button.grid(row=1, column=3)
 
 rx_button = Button(root, text="TX AUS", state=DISABLED, command=nicht_senden)
@@ -282,7 +278,9 @@ aufnahme_combo.pack(pady=10, padx=10)
 aufnahme_combo.bind("<<ComboboxSelected>>", aufnahme_select)
 
 root.mainloop()
+on_air = False
 ser.setRTS(False)
 ser.setDTR(False)
 ser.close()
 stop()
+mixer.stop()
