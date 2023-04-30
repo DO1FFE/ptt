@@ -22,7 +22,7 @@ global mic_to_speaker_running
 on_air = False
 mic_to_speaker_running = False
 
-__version__ = "0.9.9-alpha (GUI)"
+__version__ = "2023.4.1-alpha (GUI)"
 root = Tk()
 root.title("PTT v" + __version__)
 root.resizable(width=False, height=False)
