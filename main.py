@@ -1,3 +1,96 @@
+import threading
+import tkinter.font as tkFont
+from time import sleep
+from tkinter import *
+from tkinter import filedialog
+from tkinter import ttk
+
+import pygame
+import pygame._sdl2 as sdl2
+import pyaudio
+import serial
+import serial.tools.list_ports
+from PIL import Image, ImageTk
+from pygame import mixer
+
+global ser
+global comport
+global start
+global tot_timer
+global mic_to_speaker_running
+
+on_air = False
+mic_to_speaker_running = False
+
+__version__ = "0.9.9-alpha (GUI)"
+root = Tk()
+root.title("PTT v" + __version__)
+root.resizable(width=False, height=False)
+root.config(bg="grey")
+icon = ImageTk.PhotoImage(Image.open('/pics/ptt.png').resize((100, 100)))
+fontStyle = tkFont.Font(family="Lucida Grande", size=18)
+
+label1 = Label(root, image=icon, bg="grey")
+label1.grid(row=0, column=0)
+label2 = Label(root, text="PTT v" + __version__ + "\n\xa9 03/2021 by Erik Schauer, DO1FFE", font=fontStyle, bg="grey")
+label2.grid(row=0, column=1, columnspan=4)
+
+current_volume = float(0.5)
+tot_timer = 0
+
+OptionList = []
+ports = serial.tools.list_ports.comports(include_links=False)
+x = 0
+for port in ports:
+    OptionList.insert(x, port.device)
+    x = +1
+
+WiedergabeDevice = []
+pygame.init()
+is_capture = 0
+num = sdl2.get_num_audio_devices(is_capture)
+names = [str(sdl2.get_audio_device_name(i, is_capture), encoding="utf-8") for i in range(num)]
+WiedergabeDevice = names
+pygame.quit()
+
+AufnahmeDevice = []
+pygame.init()
+is_capture = 1
+num = sdl2.get_num_audio_devices(is_capture)
+names = [str(sdl2.get_audio_device_name(i, is_capture), encoding="utf-8") for i in range(num)]
+AufnahmeDevice = names
+pygame.quit()
+
+tot_times = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+
+def tot(tot_timer):
+    while on_air and tot_timer != 0:
+        print(f"Schlafe {tot_timer} Minute(n)...")
+        timer = int(tot_timer) * 60 - 2
+        sleep(timer)
+        mixer.music.pause()
+        ser.setRTS(False)
+        ser.setDTR(False)
+        print("PAUSE")
+        sleep(1)
+        print("UNPAUSE")
+        ser.setRTS(True)
+        ser.setDTR(True)
+        mixer.music.unpause()
+
+def tot_auswahl(e):
+    global tot_timer
+    tot_timer = tot_combo.get()
+
+def wiedergabe_select(e):
+    global play_device
+    play_device = wiedergabe_combo.get()
+
+def aufnahme_select(e):
+    global rec_device
+    rec_device = aufnahme_combo.get()
+
 def com_select(e):
     global ser
     global comport
