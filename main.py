@@ -184,9 +184,8 @@ def senden():
     tx_button.config(state=DISABLED)
     rx_button.config(state=ACTIVE)
     status.config(text=f"TX auf {comport}")
-    while tot_timer != 0:
-        tot1 = threading.Thread(target=tot(tot_timer))
-        tot1.start()
+    if tot_timer != 0:
+        threading.Thread(target=tot, args=(tot_timer,)).start()
 
 
 def nicht_senden():
