@@ -133,7 +133,7 @@ def mic_off():
 
 
 def tot(tot_timer):
-    while on_air and tot_timer != 0:
+    while on_air and tot_timer:
         print(f"Schlafe {tot_timer} Minute(n)...")
         timer = int(tot_timer) * 60 -2
         sleep(timer)
@@ -150,7 +150,7 @@ def tot(tot_timer):
 
 def tot_auswahl(e):
     global tot_timer
-    tot_timer = tot_combo.get()
+    tot_timer = int(tot_combo.get())
 
 
 def wiedergabe_select(e):
@@ -205,7 +205,7 @@ def tx():
     on_air = True
     t1 = threading.Thread(target=senden)
     t1.start()
-    if tot_timer != 0:
+    if tot_timer:
         tot1 = threading.Thread(target=tot, args=(tot_timer,))
         tot1.start()
 
@@ -218,7 +218,7 @@ def senden():
     tx_button.config(state=DISABLED)
     rx_button.config(state=ACTIVE)
     status.config(text=f"TX auf {comport}")
-    if tot_timer != 0:
+    if tot_timer:
         threading.Thread(target=tot, args=(tot_timer,)).start()
 
 
