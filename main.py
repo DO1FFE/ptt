@@ -21,6 +21,10 @@ global tot_timer
 
 on_air = False
 
+# Default audio device names (None means system default)
+play_device = None
+rec_device = None
+
 __version__ = "2023.4.1-alpha (GUI)"
 root = Tk()
 root.title("PTT v" + __version__)
@@ -153,17 +157,21 @@ def tot_auswahl(e):
 def wiedergabe_select(e):
     global play_device
     global play_device_index
-    play_device = wiedergabe_combo.get()
+    play_device = wiedergabe_combo.get() or None
     if mixer.get_init():
         mixer.quit()
-    mixer.pre_init(devicename=play_device)
+    if play_device:
+        mixer.pre_init(devicename=play_device)
+    else:
+        mixer.pre_init()
     mixer.init()
 
     try:
         p = pyaudio.PyAudio()
+        play_device_index = None
         for i in range(p.get_device_count()):
             info = p.get_device_info_by_index(i)
-            if info.get('maxOutputChannels') and play_device in info.get('name', ''):
+            if info.get('maxOutputChannels') and play_device and play_device in info.get('name', ''):
                 play_device_index = i
                 break
     except Exception:
@@ -173,12 +181,13 @@ def wiedergabe_select(e):
 def aufnahme_select(e):
     global rec_device
     global rec_device_index
-    rec_device = aufnahme_combo.get()
+    rec_device = aufnahme_combo.get() or None
     try:
         p = pyaudio.PyAudio()
+        rec_device_index = None
         for i in range(p.get_device_count()):
             info = p.get_device_info_by_index(i)
-            if info.get('maxInputChannels') and rec_device in info.get('name', ''):
+            if info.get('maxInputChannels') and rec_device and rec_device in info.get('name', ''):
                 rec_device_index = i
                 break
     except Exception:
@@ -267,7 +276,10 @@ def volume(x):
 
 def play():
     try:
-        mixer.pre_init(devicename=play_device)
+        if play_device:
+            mixer.pre_init(devicename=play_device)
+        else:
+            mixer.pre_init()
         mixer.init()
         mixer.music.load(current_song)
         # mixer.music.set_volume(current_volume)
