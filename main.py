@@ -40,6 +40,7 @@ label2.grid(row=0, column=1, columnspan=4)
 
 current_volume = float(0.5)
 tot_timer = 0
+tot_thread = None
 
 # COM-Ports aus dem System auslesen und in das Dropdown-Menü einbinden.
 OptionList = []
@@ -150,7 +151,8 @@ def tot(tot_timer):
 
 def tot_auswahl(e):
     global tot_timer
-    tot_timer = tot_combo.get()
+    # store TOT timer as integer for proper comparisons
+    tot_timer = int(tot_combo.get())
 
 
 def wiedergabe_select(e):
@@ -205,21 +207,19 @@ def tx():
     on_air = True
     t1 = threading.Thread(target=senden)
     t1.start()
-    if tot_timer != 0:
-        tot1 = threading.Thread(target=tot, args=(tot_timer,))
-        tot1.start()
 
 
 def senden():
-    global on_air
+    global on_air, tot_thread
     on_air = True
     ser.setRTS(True)
     ser.setDTR(True)
     tx_button.config(state=DISABLED)
     rx_button.config(state=ACTIVE)
     status.config(text=f"TX auf {comport}")
-    if tot_timer != 0:
-        threading.Thread(target=tot, args=(tot_timer,)).start()
+    if tot_timer != 0 and (tot_thread is None or not tot_thread.is_alive()):
+        tot_thread = threading.Thread(target=tot, args=(tot_timer,), daemon=True)
+        tot_thread.start()
 
 
 def nicht_senden():
@@ -234,7 +234,7 @@ def nicht_senden():
 
 
 def com_schliessen():
-    global on_air
+    global on_air, tot_thread
     on_air = False
     rx_button.config(state=DISABLED)
     tx_button.config(state=DISABLED)
@@ -245,6 +245,9 @@ def com_schliessen():
     ser.setRTS(False)
     ser.setDTR(False)
     ser.close()
+    if tot_thread is not None:
+        tot_thread.join(timeout=0.1)
+        tot_thread = None
     stop()
 
 
