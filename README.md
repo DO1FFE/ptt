@@ -9,3 +9,15 @@ Eine weitere Funktion der Anwendung ist die "TOT" (Time Out Timer) -Funktion, di
 Zusätzlich bietet die Anwendung die Möglichkeit, das Mikrofonsignal direkt über den Lautsprecher auszugeben. Der Benutzer kann diese Funktion aktivieren und deaktivieren, sowie das Mikrofon- und Lautsprechergerät auswählen.
 
 Das Projekt ist nützlich für Amateurradiobetreiber und andere, die mit Transceivern arbeiten, und bietet eine einfache und bequeme Möglichkeit, die Geräte über den Computer zu steuern.
+
+## Installation
+
+1. Stelle sicher, dass Python 3 installiert ist.
+2. Installiere die Abhängigkeiten mit:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Starte die Anwendung mit:
+   ```bash
+   python main.py
+   ```
