@@ -205,9 +205,6 @@ def tx():
     on_air = True
     t1 = threading.Thread(target=senden)
     t1.start()
-    if tot_timer != 0:
-        tot1 = threading.Thread(target=tot, args=(tot_timer,))
-        tot1.start()
 
 
 def senden():
@@ -219,7 +216,7 @@ def senden():
     rx_button.config(state=ACTIVE)
     status.config(text=f"TX auf {comport}")
     if tot_timer != 0:
-        threading.Thread(target=tot, args=(tot_timer,)).start()
+        threading.Thread(target=tot, args=(tot_timer,), daemon=True).start()
 
 
 def nicht_senden():
