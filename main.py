@@ -174,6 +174,7 @@ def wiedergabe_select(e):
             if info.get('maxOutputChannels') and play_device and play_device in info.get('name', ''):
                 play_device_index = i
                 break
+        p.terminate()
     except Exception:
         play_device_index = None
 
@@ -190,6 +191,7 @@ def aufnahme_select(e):
             if info.get('maxInputChannels') and rec_device and rec_device in info.get('name', ''):
                 rec_device_index = i
                 break
+        p.terminate()
     except Exception:
         rec_device_index = None
 
