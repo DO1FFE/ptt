@@ -43,11 +43,8 @@ tot_timer = 0
 
 # COM-Ports aus dem System auslesen und in das Dropdown-Menü einbinden.
 OptionList = []
-ports = serial.tools.list_ports.comports(include_links=False)
-x = 0
-for port in ports:
-    OptionList.insert(x, port.device)
-    x = +1
+for port in serial.tools.list_ports.comports(include_links=False):
+    OptionList.append(port.device)
 
 # Wiedergabe-Devices auslesen und in das Dropdown-Menü einbinden.
 WiedergabeDevice = []
