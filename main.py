@@ -1,4 +1,5 @@
 import threading
+
 import tkinter.font as tkFont
 from time import sleep
 from tkinter import *
@@ -40,6 +41,8 @@ label2.grid(row=0, column=1, columnspan=4)
 
 current_volume = float(0.5)
 tot_timer = 0
+background_threads = []
+stop_event = threading.Event()
 
 # COM-Ports aus dem System auslesen und in das Dropdown-Menü einbinden.
 OptionList = []
@@ -133,15 +136,17 @@ def mic_off():
 
 
 def tot(tot_timer):
-    while on_air and tot_timer != 0:
+    while on_air and tot_timer != 0 and not stop_event.is_set():
         print(f"Schlafe {tot_timer} Minute(n)...")
-        timer = int(tot_timer) * 60 -2
-        sleep(timer)
+        timer = int(tot_timer) * 60 - 2
+        if stop_event.wait(timer):
+            break
         mixer.music.pause()
         ser.setRTS(False)
         ser.setDTR(False)
         print("PAUSE")
-        sleep(1)
+        if stop_event.wait(1):
+            break
         print("UNPAUSE")
         ser.setRTS(True)
         ser.setDTR(True)
@@ -204,9 +209,11 @@ def tx():
     global on_air
     on_air = True
     t1 = threading.Thread(target=senden)
+    background_threads.append(t1)
     t1.start()
     if tot_timer != 0:
         tot1 = threading.Thread(target=tot, args=(tot_timer,))
+        background_threads.append(tot1)
         tot1.start()
 
 
@@ -219,7 +226,9 @@ def senden():
     rx_button.config(state=ACTIVE)
     status.config(text=f"TX auf {comport}")
     if tot_timer != 0:
-        threading.Thread(target=tot, args=(tot_timer,)).start()
+        tot_thread = threading.Thread(target=tot, args=(tot_timer,))
+        background_threads.append(tot_thread)
+        tot_thread.start()
 
 
 def nicht_senden():
@@ -372,6 +381,9 @@ aufnahme_combo.bind("<<ComboboxSelected>>", aufnahme_select)
 
 root.mainloop()
 on_air = False
+stop_event.set()
+for t in background_threads:
+    t.join()
 if 'ser' in globals() and ser:
     ser.setRTS(False)
     ser.setDTR(False)
