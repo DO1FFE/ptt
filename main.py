@@ -16,7 +16,6 @@ import pyaudio
 global mic_stream
 global ser
 global comport
-global start
 global tot_timer
 
 on_air = False
