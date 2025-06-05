@@ -261,7 +261,7 @@ status.grid(row=10, column=0, columnspan=5, sticky=W + E)
 def open_song():
     global current_song
     global song_title
-    filename = filedialog.askopenfilename(initialdir="C:/", title="Bitte MP3-Datei auswählen")
+    filename = filedialog.askopenfilename(initialdir=os.getcwd(), title="Bitte MP3-Datei auswählen")
     current_song = filename
     song_title = os.path.basename(filename)
 
