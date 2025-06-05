@@ -339,8 +339,9 @@ aufnahme_combo.bind("<<ComboboxSelected>>", aufnahme_select)
 
 root.mainloop()
 on_air = False
-ser.setRTS(False)
-ser.setDTR(False)
-ser.close()
+if 'ser' in globals() and ser:
+    ser.setRTS(False)
+    ser.setDTR(False)
+    ser.close()
 stop()
 mixer.stop()
