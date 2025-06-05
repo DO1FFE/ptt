@@ -1,0 +1,4 @@
+pygame
+pyaudio
+pyserial
+Pillow
