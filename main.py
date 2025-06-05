@@ -4,6 +4,7 @@ from time import sleep
 from tkinter import *
 from tkinter import filedialog
 from tkinter import ttk
+import os
 
 import pygame
 import pygame._sdl2 as sdl2
@@ -223,8 +224,7 @@ def open_song():
     global song_title
     filename = filedialog.askopenfilename(initialdir="C:/", title="Bitte MP3-Datei auswählen")
     current_song = filename
-    song_title = filename.split("/")
-    song_title = song_title[-1]
+    song_title = os.path.basename(filename)
 
 
 def volume(x):
