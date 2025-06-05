@@ -40,6 +40,8 @@ label2.grid(row=0, column=1, columnspan=4)
 
 current_volume = float(0.5)
 tot_timer = 0
+tot_thread = None
+tot_stop_event = threading.Event()
 
 # COM-Ports aus dem System auslesen und in das Dropdown-Menü einbinden.
 OptionList = []
@@ -132,25 +134,37 @@ def mic_off():
     mic_button.config(text="MIC ON", command=mic_on)
 
 
-def tot(tot_timer):
-    while on_air and tot_timer != 0:
-        print(f"Schlafe {tot_timer} Minute(n)...")
-        timer = int(tot_timer) * 60 -2
-        sleep(timer)
-        mixer.music.pause()
-        ser.setRTS(False)
-        ser.setDTR(False)
-        print("PAUSE")
-        sleep(1)
-        print("UNPAUSE")
-        ser.setRTS(True)
-        ser.setDTR(True)
-        mixer.music.unpause()
+def tot(stop_event):
+    """Transmit timeout thread."""
+    global tot_thread
+    try:
+        while on_air and tot_timer != 0 and not stop_event.is_set():
+            print(f"Schlafe {tot_timer} Minute(n)...")
+            timer = int(tot_timer) * 60 - 2
+            if stop_event.wait(timer):
+                break
+            mixer.music.pause()
+            ser.setRTS(False)
+            ser.setDTR(False)
+            print("PAUSE")
+            sleep(1)
+            print("UNPAUSE")
+            ser.setRTS(True)
+            ser.setDTR(True)
+            mixer.music.unpause()
+    finally:
+        # clear handle when the thread ends
+        tot_thread = None
 
 
 def tot_auswahl(e):
-    global tot_timer
-    tot_timer = tot_combo.get()
+    global tot_timer, tot_thread
+    # store TOT timer as integer for proper comparisons
+    tot_timer = int(tot_combo.get())
+    # stop running timer thread if TOT disabled
+    if tot_timer == 0 and tot_thread is not None and tot_thread.is_alive():
+        tot_stop_event.set()
+        tot_thread.join(timeout=0.1)
 
 
 def wiedergabe_select(e):
@@ -205,21 +219,20 @@ def tx():
     on_air = True
     t1 = threading.Thread(target=senden)
     t1.start()
-    if tot_timer != 0:
-        tot1 = threading.Thread(target=tot, args=(tot_timer,))
-        tot1.start()
 
 
 def senden():
-    global on_air
+    global on_air, tot_thread
     on_air = True
     ser.setRTS(True)
     ser.setDTR(True)
     tx_button.config(state=DISABLED)
     rx_button.config(state=ACTIVE)
     status.config(text=f"TX auf {comport}")
-    if tot_timer != 0:
-        threading.Thread(target=tot, args=(tot_timer,)).start()
+    if tot_timer != 0 and (tot_thread is None or not tot_thread.is_alive()):
+        tot_stop_event.clear()
+        tot_thread = threading.Thread(target=tot, args=(tot_stop_event,), daemon=True)
+        tot_thread.start()
 
 
 def nicht_senden():
@@ -234,7 +247,7 @@ def nicht_senden():
 
 
 def com_schliessen():
-    global on_air
+    global on_air, tot_thread
     on_air = False
     rx_button.config(state=DISABLED)
     tx_button.config(state=DISABLED)
@@ -245,6 +258,10 @@ def com_schliessen():
     ser.setRTS(False)
     ser.setDTR(False)
     ser.close()
+    if tot_thread is not None:
+        tot_stop_event.set()
+        tot_thread.join(timeout=0.1)
+        tot_thread = None
     stop()
 
 
