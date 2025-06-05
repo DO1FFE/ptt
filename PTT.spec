@@ -1,13 +1,17 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import os
+
+project_root = os.path.abspath(SPECPATH)
+
 
 block_cipher = None
 
 
-a = Analysis(['C:/Users/werner/PycharmProjects/ptt/main.py'],
-             pathex=['C:\\Users\\werner\\PycharmProjects\\ptt'],
+a = Analysis([os.path.join(project_root, 'main.py')],
+             pathex=[project_root],
              binaries=[],
-             datas=[('C:/Users/werner/PycharmProjects/ptt/pics/ptt.png', '/pics')],
+             datas=[(os.path.join(project_root, 'pics', 'ptt.png'), 'pics')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -31,4 +35,4 @@ exe = EXE(pyz,
           upx=True,
           upx_exclude=[],
           runtime_tmpdir=None,
-          console=False , icon='C:\\Users\\werner\\PycharmProjects\\ptt\\pics\\ptt.ico')
+         console=False , icon=os.path.join(project_root, 'pics', 'ptt.ico'))

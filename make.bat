@@ -1,1 +1,3 @@
-pyinstaller --noconfirm --onefile --windowed --icon "C:/Users/werner/PycharmProjects/ptt/pics/ptt.ico" --name "PTT" --add-data "C:/Users/werner/PycharmProjects/ptt/pics/ptt.png;/pics"  "C:/Users/werner/PycharmProjects/ptt/main.py"
+@echo off
+set "ROOT=%~dp0"
+pyinstaller --noconfirm --onefile --windowed --icon "%ROOT%pics\ptt.ico" --name "PTT" --add-data "%ROOT%pics\ptt.png;pics" "%ROOT%main.py"
