@@ -41,6 +41,7 @@ label2.grid(row=0, column=1, columnspan=4)
 current_volume = float(0.5)
 tot_timer = 0
 tot_thread = None
+tot_stop_event = threading.Event()
 
 # COM-Ports aus dem System auslesen und in das Dropdown-Menü einbinden.
 OptionList = []
@@ -133,11 +134,12 @@ def mic_off():
     mic_button.config(text="MIC ON", command=mic_on)
 
 
-def tot(tot_timer):
-    while on_air and tot_timer != 0:
+def tot(stop_event):
+    while on_air and tot_timer != 0 and not stop_event.is_set():
         print(f"Schlafe {tot_timer} Minute(n)...")
         timer = int(tot_timer) * 60 -2
-        sleep(timer)
+        if stop_event.wait(timer):
+            break
         mixer.music.pause()
         ser.setRTS(False)
         ser.setDTR(False)
@@ -218,7 +220,8 @@ def senden():
     rx_button.config(state=ACTIVE)
     status.config(text=f"TX auf {comport}")
     if tot_timer != 0 and (tot_thread is None or not tot_thread.is_alive()):
-        tot_thread = threading.Thread(target=tot, args=(tot_timer,), daemon=True)
+        tot_stop_event.clear()
+        tot_thread = threading.Thread(target=tot, args=(tot_stop_event,), daemon=True)
         tot_thread.start()
 
 
@@ -246,6 +249,7 @@ def com_schliessen():
     ser.setDTR(False)
     ser.close()
     if tot_thread is not None:
+        tot_stop_event.set()
         tot_thread.join(timeout=0.1)
         tot_thread = None
     stop()
