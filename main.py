@@ -51,6 +51,7 @@ for port in ports:
 
 # Wiedergabe-Devices auslesen und in das Dropdown-Menü einbinden.
 WiedergabeDevice = []
+play_device_index = None
 pygame.init()
 is_capture = 0  # zero to request playback devices, non-zero to request recording devices
 num = sdl2.get_num_audio_devices(is_capture)
@@ -61,6 +62,7 @@ pygame.quit()
 
 # Aufnahme-Devices auslesen und in das Dropdown-Menü einbinden.
 AufnahmeDevice = []
+rec_device_index = None
 pygame.init()
 is_capture = 1  # zero to request playback devices, non-zero to request recording devices
 num = sdl2.get_num_audio_devices(is_capture)
@@ -88,17 +90,28 @@ def mic_on():
     tx()
 
     p = pyaudio.PyAudio()
-    stream = p.open(format=pyaudio.paInt16,
-                    channels=1,
-                    rate=44100,
-                    input=True,
-                    output=True,
-                    frames_per_buffer=1024)
-
-    mic_stream = stream
 
     def callback(in_data, frame_count, time_info, status):
+        """Forward recorded audio directly to the output device."""
         return in_data, pyaudio.paContinue
+
+    kwargs = {
+        "format": pyaudio.paInt16,
+        "channels": 1,
+        "rate": 44100,
+        "input": True,
+        "output": True,
+        "frames_per_buffer": 1024,
+        "stream_callback": callback,
+    }
+    if 'rec_device_index' in globals() and rec_device_index is not None:
+        kwargs["input_device_index"] = rec_device_index
+    if 'play_device_index' in globals() and play_device_index is not None:
+        kwargs["output_device_index"] = play_device_index
+
+    stream = p.open(**kwargs)
+
+    mic_stream = stream
 
     stream.start_stream()
 
@@ -142,16 +155,37 @@ def tot_auswahl(e):
 
 def wiedergabe_select(e):
     global play_device
+    global play_device_index
     play_device = wiedergabe_combo.get()
     if mixer.get_init():
         mixer.quit()
     mixer.pre_init(devicename=play_device)
     mixer.init()
 
+    try:
+        p = pyaudio.PyAudio()
+        for i in range(p.get_device_count()):
+            info = p.get_device_info_by_index(i)
+            if info.get('maxOutputChannels') and play_device in info.get('name', ''):
+                play_device_index = i
+                break
+    except Exception:
+        play_device_index = None
+
 
 def aufnahme_select(e):
     global rec_device
+    global rec_device_index
     rec_device = aufnahme_combo.get()
+    try:
+        p = pyaudio.PyAudio()
+        for i in range(p.get_device_count()):
+            info = p.get_device_info_by_index(i)
+            if info.get('maxInputChannels') and rec_device in info.get('name', ''):
+                rec_device_index = i
+                break
+    except Exception:
+        rec_device_index = None
 
 
 def com_select(e):
@@ -331,7 +365,7 @@ wiedergabe_combo.bind("<<ComboboxSelected>>", wiedergabe_select)
 
 aufnahme_box = LabelFrame(sound_frame, text="Input", bg="gray")
 aufnahme_box.pack(pady=10, padx=10)
-aufnahme_combo = ttk.Combobox(aufnahme_box, value=AufnahmeDevice, state=DISABLED)
+aufnahme_combo = ttk.Combobox(aufnahme_box, value=AufnahmeDevice)
 aufnahme_combo.config(width=20, font=('Helvetica', 10))
 aufnahme_combo.pack(pady=10, padx=10)
 aufnahme_combo.bind("<<ComboboxSelected>>", aufnahme_select)
